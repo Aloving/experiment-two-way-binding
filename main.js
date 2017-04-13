@@ -1,5 +1,6 @@
 var customModel = (function(){
 
+	//initial jsonModel for demonic manipulation
 	var jsonModel = {
 			_kekprop: '11',
 			get kekprop(){
@@ -13,7 +14,9 @@ var customModel = (function(){
 			}
 		};
 
+	//list of subscribers
 	var subscribers = (function(){
+		//get properties by getters
 		var getters = Object.entries(Object.getOwnPropertyDescriptors(jsonModel))
 			  .filter(([key, descriptor]) => typeof descriptor.get === 'function')
 			  .map(([key]) => key);
@@ -27,14 +30,17 @@ var customModel = (function(){
 
 	})();
 
+	//function for add subscribe
 	function addSubscribers(property, value){
 		subscribers[property].push(value);
 	}
 
+	//function for get subscribers
 	function getSubscribers(){
 		return subscribers;
 	}
 
+	//public methods of this demonic model
 	return {
 		jsonModel: jsonModel,
 		addSubscribers: addSubscribers,
@@ -42,8 +48,10 @@ var customModel = (function(){
 	}
 })();
 
+// cleaned flag for lulz
 var wasCleaned = false;
 
+//randomize id (just for fun)
 function randomizeId(){
 	var generatedID = `id-${Math.floor(Math.random() * 4000)}-${generate(5)}`;
 
@@ -60,6 +68,7 @@ function randomizeId(){
 	return generatedID
 }
 
+// inputs create-function
 function inputCreate(model, bindProperty, bindAttr){
 	var input = document.createElement("input");
 	var composition = compositionFunction.bind(input, model, bindProperty, bindAttr);
@@ -69,8 +78,13 @@ function inputCreate(model, bindProperty, bindAttr){
 	});
 
 	input.setAttribute('id', randomizeId());
+
+	/*call first composition 
+	TODO try fixed
+	*/
 	composition();
 
+	//subscribe this element with model
 	model.addSubscribers(bindProperty ,{
 		element: input,
 		composition: composition
@@ -79,27 +93,20 @@ function inputCreate(model, bindProperty, bindAttr){
 	return input;
 }
 
-function compositionFunction(model, bindProperty, bindAttr){
-	var _that = this;
-
-	bindAttr.forEach(function(propertySettings){
-		if(propertySettings.propType === 'attribute'){
-			_that.setAttribute(propertySettings.property, model.jsonModel[bindProperty]);
-		}else if(propertySettings.propType === 'text'){
-			_that.innerText = model.jsonModel[bindProperty];
-		}
-	});
-
-}
-
+// labels create-function
 function labelCreate(model, bindProperty, bindAttr, inputFollow){
 	var label = document.createElement("label");
 	var composition = compositionFunction.bind(label, model, bindProperty, bindAttr);
 
+	//bound label with input
 	label.setAttribute('for', inputFollow);
 
+	/*call first composition 
+		TODO try fixed
+	*/
 	composition();
 
+	//subscribe this element with model
 	model.addSubscribers(bindProperty ,{
 		element: label,
 		composition: composition
@@ -108,7 +115,23 @@ function labelCreate(model, bindProperty, bindAttr, inputFollow){
 	return label;
 }
 
-function createElement(settings){
+//no comment
+function compositionFunction(model, bindProperty, bindAttr){
+	var _that = this;
+
+	bindAttr.forEach(function(propertySettings){
+		if(propertySettings.propType === 'attribute'){
+			_that.setAttribute(propertySettings.property, model.jsonModel[bindProperty]);
+			_that.value = model.jsonModel[bindProperty];
+		}else if(propertySettings.propType === 'text'){
+			_that.innerText = model.jsonModel[bindProperty];
+		}
+	});
+
+}
+
+// a little function for generate elements
+function Element(settings){
 	var {element, model, bindProperty, bindAttr, inputFollow} = settings;
 	switch(element){
 		case 'input':
@@ -120,23 +143,29 @@ function createElement(settings){
 }
 
 window.onload = function(){
+	// main view container
 	var myContainer = document.querySelector('.container');
 
-	var kekInput = new createElement({
+	/*create new elements
+		two elements:
+		- input
+		- label
+	*/
+	var kekInput = new Element({
 		element: 'input',
 		model: customModel,
 		bindProperty: 'kekprop',
 		bindAttr: [{property: 'value', propType: 'attribute'}]
 	});	
 
-	var kekInput1 = new createElement({
+	var kekInput1 = new Element({
 		element: 'input',
 		model: customModel,
 		bindProperty: 'kekprop',
 		bindAttr: [{property: 'value', propType: 'attribute'}]
 	});
 
-	var kekLabel = new createElement({
+	var kekLabel = new Element({
 		element: 'label',
 		model: customModel,
 		bindProperty: 'kekprop',
@@ -144,6 +173,7 @@ window.onload = function(){
 		inputFollow: kekInput.getAttribute('id')
 	});
 
+	//insert elements into HTML (some bad code)
 	insertTo(kekInput, myContainer);
 	insertTo(kekInput1, myContainer);
 	insertTo(kekLabel, myContainer);
